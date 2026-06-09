@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美学 · 背诵复习</title>
+<style>
+:root{
+  --fg:#1a1a1a; --bg:#ffffff; --muted:#5a5a5a; --line:#cfcfcf;
+  --soft:#f4f4f4; --soft2:#edede00; --accent:#1f5fbf; --ok:#1d7a3d;
+  --bad:#b32424; --star:#c98a00; --done:#1d7a3d;
+  --fs:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei","Heiti SC",sans-serif;
+  color:var(--fg); background:var(--bg);
+  font-size:var(--fs); line-height:1.7;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:120px;
+}
+/* ---- 顶部 ---- */
+header{position:sticky;top:0;z-index:30;background:var(--bg);
+  border-bottom:2px solid var(--fg);padding:8px 10px;}
+h1{font-size:1.15rem;margin:0 0 6px;}
+.progress-wrap{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.bar{flex:1;height:16px;border:1px solid var(--fg);background:var(--soft);}
+.bar > i{display:block;height:100%;background:var(--done);width:0%;}
+.pct{font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right;}
+.daily{font-size:.9rem;color:var(--muted);margin-bottom:6px;}
+.daily b{color:var(--fg);}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.toolbar input[type=search]{flex:1 1 140px;min-width:120px;font-size:1rem;
+  padding:7px 9px;border:1px solid var(--line);}
+button{font-family:inherit;font-size:.95rem;padding:8px 11px;
+  border:1px solid var(--fg);background:var(--bg);color:var(--fg);
+  cursor:pointer;border-radius:0;min-height:38px;}
+button:active{background:var(--soft);}
+button.on{background:var(--fg);color:var(--bg);}
+.depthsel{display:flex;gap:4px;align-items:center;}
+.depthsel select{font-size:.95rem;padding:7px;border:1px solid var(--line);min-height:38px;}
+/* ---- 章 ---- */
+main{padding:6px 8px 10px;}
+.chapter{border-left:7px solid var(--cc,#888);margin:10px 0;
+  background:var(--bg);}
+.ch-head{display:flex;align-items:center;gap:8px;padding:9px 8px;
+  border-bottom:1px solid var(--line);cursor:pointer;}
+.ch-title{font-weight:700;font-size:1.05rem;flex:1;}
+.ch-count{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+/* ---- 树 ---- */
+.tree{padding:2px 0 6px;}
+.node{}
+.row{display:flex;align-items:flex-start;gap:6px;padding:5px 6px;
+  border-bottom:1px solid #ececec;}
+.row .twist{flex:0 0 auto;width:1.6em;text-align:center;color:var(--muted);
+  cursor:pointer;user-select:none;font-size:1rem;line-height:1.6;}
+.row .label{flex:1;cursor:pointer;}
+.row .marker{font-weight:700;}
+.leaf-title{color:var(--fg);}
+.leaf-body{display:none;margin-top:4px;color:var(--fg);
+  background:var(--soft);border:1px solid var(--line);padding:7px 9px;}
+.node.open > .row .leaf-body, .leaf-body.show{display:block;}
+.row .act{flex:0 0 auto;display:flex;gap:4px;align-items:center;}
+.chk{width:22px;height:22px;flex:0 0 auto;cursor:pointer;
+  border:1.5px solid var(--fg);background:var(--bg);display:inline-flex;
+  align-items:center;justify-content:center;font-size:1rem;line-height:1;}
+.chk.done{background:var(--done);color:#fff;border-color:var(--done);}
+.star{cursor:pointer;font-size:1.2rem;color:var(--line);width:1.4em;text-align:center;}
+.star.on{color:var(--star);}
+.row.is-done .leaf-title{color:var(--muted);}
+/* 悬挂缩进：换行与标题后文字对齐 */
+.label{padding-left:var(--ind,0);text-indent:calc(-1 * var(--hang,0));}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0;}
+table{border-collapse:collapse;min-width:100%;}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;
+  white-space:nowrap;}
+th{background:var(--soft);}
+/* ---- 练习 ---- */
+.quiz-head{padding:9px 8px;border-top:1px dashed var(--line);
+  font-weight:700;cursor:pointer;color:var(--accent);}
+.quiz-panel{display:none;padding:4px 8px 10px;}
+.quiz-panel.show{display:block;}
+.qfilter{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
+.qstat{font-size:.9rem;color:var(--muted);margin:4px 0;}
+.q-item{border:1px solid var(--line);margin:8px 0;padding:8px 9px;}
+.q-type{display:inline-block;font-size:.78rem;border:1px solid var(--line);
+  padding:0 6px;margin-right:6px;color:var(--muted);}
+.q-q{margin:4px 0;}
+.q-ans{display:none;margin-top:6px;padding:7px 9px;background:var(--soft);
+  border:1px solid var(--line);white-space:pre-wrap;}
+.q-ans.show{display:block;}
+.q-grade{margin-top:6px;display:flex;gap:6px;}
+.q-grade .picked-ok{background:var(--ok);color:#fff;border-color:var(--ok);}
+.q-grade .picked-bad{background:var(--bad);color:#fff;border-color:var(--bad);}
+/* ---- 底部导航 ---- */
+#navbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:flex;gap:4px;padding:7px 6px;background:var(--bg);
+  border-top:2px solid var(--fg);}
+#navbar button{flex:1;font-size:.95rem;min-height:46px;padding:6px 4px;}
+.hidden{display:none !important;}
+#empty{padding:20px;text-align:center;color:var(--muted);}
+@media(min-width:680px){
+  :root{--fs:16px;}
+  body{max-width:900px;margin:0 auto;}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">美学 · 背诵复习</h1>
+  <div class="progress-wrap">
+    <div class="bar"><i id="barfill"></i></div>
+    <span class="pct" id="pcttext">0%</span>
+  </div>
+  <div class="daily" id="daily"></div>
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="搜索知识点 / 题目…">
+    <div class="depthsel">展开到
+      <select id="depth">
+        <option value="1">第1层</option>
+        <option value="2">第2层</option>
+        <option value="3">第3层</option>
+        <option value="4">第4层</option>
+        <option value="5">第5层</option>
+        <option value="6">第6层</option>
+      </select>
+    </div>
+    <button id="expandAll">全部展开</button>
+    <button id="collapseAll">全部收起</button>
+    <button id="onlyUnread">只看未背</button>
+    <button id="onlyStar">只看★</button>
+    <button id="btnExport">导出进度</button>
+    <button id="btnImport">导入进度</button>
+    <button id="btnClear">清空进度</button>
+  </div>
+</header>
+
+<main id="app"><div id="empty">加载中…</div></main>
+
+<nav id="navbar">
+  <button id="navTop">⤒ 顶部</button>
+  <button id="navPrev">‹ 上一条</button>
+  <button id="navNext">下一条 ›</button>
+  <button id="navDoneNext">✓ 已背并下一条</button>
+</nav>
+
+<!-- 数据与逻辑：相对路径，离线可用 -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
